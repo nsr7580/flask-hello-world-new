@@ -1,28 +1,101 @@
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fpython%2Fflask3&demo-title=Flask%203%20%2B%20Vercel&demo-description=Use%20Flask%203%20on%20Vercel%20with%20Serverless%20Functions%20using%20the%20Python%20Runtime.&demo-url=https%3A%2F%2Fflask3-python-template.vercel.app%2F&demo-image=https://assets.vercel.com/image/upload/v1669994156/random/flask.png)
+This is a [LlamaIndex](https://www.llamaindex.ai/) project using [FastAPI](https://fastapi.tiangolo.com/) bootstrapped with [`create-llama`](https://github.com/run-llama/LlamaIndexTS/tree/main/packages/create-llama).
 
-# Flask + Vercel
+## Getting Started
 
-This example shows how to use Flask 3 on Vercel with Serverless Functions using the [Python Runtime](https://vercel.com/docs/concepts/functions/serverless-functions/runtimes/python).
+First, setup the environment with poetry:
 
-## Demo
+> **_Note:_** This step is not needed if you are using the dev-container.
 
-https://flask-python-template.vercel.app/
-
-## How it Works
-
-This example uses the Web Server Gateway Interface (WSGI) with Flask to enable handling requests on Vercel with Serverless Functions.
-
-## Running Locally
-
-```bash
-npm i -g vercel
-vercel dev
+```
+poetry install
+poetry shell
 ```
 
-Your Flask application is now available at `http://localhost:3000`.
+Then check the parameters that have been pre-configured in the `.env` file in this directory. (E.g. you might need to configure an `OPENAI_API_KEY` if you're using OpenAI as model provider).
 
-## One-Click Deploy
+If you are using any tools or data sources, you can update their config files in the `config` folder.
 
-Deploy the example using [Vercel](https://vercel.com?utm_source=github&utm_medium=readme&utm_campaign=vercel-examples):
+Second, generate the embeddings of the documents in the `./data` directory (if this folder exists - otherwise, skip this step):
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fexamples%2Ftree%2Fmain%2Fpython%2Fflask3&demo-title=Flask%203%20%2B%20Vercel&demo-description=Use%20Flask%203%20on%20Vercel%20with%20Serverless%20Functions%20using%20the%20Python%20Runtime.&demo-url=https%3A%2F%2Fflask3-python-template.vercel.app%2F&demo-image=https://assets.vercel.com/image/upload/v1669994156/random/flask.png)
+```
+poetry run generate
+```
+
+Third, run the development server:
+
+```
+python main.py
+```
+
+The example provides two different API endpoints:
+
+1. `/api/chat` - a streaming chat endpoint
+2. `/api/chat/request` - a non-streaming chat endpoint
+
+You can test the streaming endpoint with the following curl request:
+
+```
+curl --location 'localhost:8000/api/chat' \
+--header 'Content-Type: application/json' \
+--data '{ "messages": [{ "role": "user", "content": "Hello" }] }'
+```
+
+And for the non-streaming endpoint run:
+
+```
+curl --location 'localhost:8000/api/chat/request' \
+--header 'Content-Type: application/json' \
+--data '{ "messages": [{ "role": "user", "content": "Hello" }] }'
+```
+
+You can start editing the API endpoints by modifying `app/api/routers/chat.py`. The endpoints auto-update as you save the file. You can delete the endpoint you're not using.
+
+Open [http://localhost:8000/docs](http://localhost:8000/docs) with your browser to see the Swagger UI of the API.
+
+The API allows CORS for all origins to simplify development. You can change this behavior by setting the `ENVIRONMENT` environment variable to `prod`:
+
+```
+ENVIRONMENT=prod python main.py
+```
+
+## Using Docker
+
+1. Build an image for the FastAPI app:
+
+```
+docker build -t <your_backend_image_name> .
+```
+
+2. Generate embeddings:
+
+Parse the data and generate the vector embeddings if the `./data` folder exists - otherwise, skip this step:
+
+```
+docker run \
+  --rm \
+  -v $(pwd)/.env:/app/.env \ # Use ENV variables and configuration from your file-system
+  -v $(pwd)/config:/app/config \
+  -v $(pwd)/data:/app/data \ # Use your local folder to read the data
+  -v $(pwd)/storage:/app/storage \ # Use your file system to store the vector database
+  <your_backend_image_name> \
+  poetry run generate
+```
+
+3. Start the API:
+
+```
+docker run \
+  -v $(pwd)/.env:/app/.env \ # Use ENV variables and configuration from your file-system
+  -v $(pwd)/config:/app/config \
+  -v $(pwd)/storage:/app/storage \ # Use your file system to store gea vector database
+  -p 8000:8000 \
+  <your_backend_image_name>
+```
+
+## Learn More
+
+To learn more about LlamaIndex, take a look at the following resources:
+
+- [LlamaIndex Documentation](https://docs.llamaindex.ai) - learn about LlamaIndex.
+
+You can check out [the LlamaIndex GitHub repository](https://github.com/run-llama/llama_index) - your feedback and contributions are welcome!

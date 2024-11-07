@@ -1,0 +1,15 @@
+aiostream
+cachetools
+fastapi
+llama_index
+llama_parse
+nest_asyncio==1.6.0
+pydantic==2.9.2
+python-dotenv
+pytz==2024.2
+PyYAML==6.0.2
+openai
+Requests==2.32.3
+selenium==4.26.1
+uvicorn==0.32.0
+xhtml2pdf==0.2.16
